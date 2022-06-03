@@ -1,4 +1,4 @@
-import { Component } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { loadPosts } from '../../utils/load-posts'
 import { Posts } from '../../components/Posts'
 import { Button } from '../../components/Button'
@@ -6,77 +6,70 @@ import { TextInput } from '../../components/TextInput'
 
 import './styles.css'
 
-export class Home extends Component {
-  state = {
-    posts: [],
-    allPosts: [],
-    page: 0,
-    postsPerPage: 12,
-    searchValue: '',
-  }
+export const Home = () => {
+  const [posts, setPosts] = useState([])
+  const [allPosts, setAllPosts] = useState([])
+  const [page, setPage] = useState(0)
+  const [searchValue, setSearchValue] = useState('')
 
-  loadPosts = async () => {
-    const { page, postsPerPage } = this.state
+  const POSTS_PER_PAGE = 12
 
+  const noMorePosts = page + POSTS_PER_PAGE >= allPosts.length
+
+  const filteredPosts = !!searchValue
+    ? allPosts.filter((p) =>
+        p.title.toLowerCase().includes(searchValue.toLowerCase())
+      )
+    : posts
+
+  const handleLoadPosts = useCallback(async (page, postsPerPage) => {
     const postsAndPhotos = await loadPosts()
 
-    this.setState({
-      posts: postsAndPhotos.slice(page, postsPerPage),
-      allPosts: postsAndPhotos,
-    })
-  }
+    setPosts(postsAndPhotos.slice(page, postsPerPage))
+    setAllPosts(postsAndPhotos)
+  }, [])
 
-  loadMorePosts = () => {
-    const { page, postsPerPage, allPosts, posts } = this.state
-    const nextPage = page + postsPerPage
-    const nextPosts = allPosts.slice(nextPage, nextPage + postsPerPage)
+  const loadMorePosts = () => {
+    const nextPage = page + POSTS_PER_PAGE
+    const nextPosts = allPosts.slice(nextPage, nextPage + POSTS_PER_PAGE)
 
     posts.push(...nextPosts)
-    this.setState({ posts, page: nextPage })
+
+    setPosts(posts)
+    setPage(nextPage)
   }
 
-  handleSearchChange = (e) => {
+  const handleSearchChange = (e) => {
     const { value } = e.target
 
-    this.setState({ searchValue: value })
+    setSearchValue(value)
   }
 
-  async componentDidMount() {
-    await this.loadPosts()
-  }
+  useEffect(() => {
+    handleLoadPosts(0, POSTS_PER_PAGE)
+  }, [handleLoadPosts, POSTS_PER_PAGE])
 
-  render() {
-    const { posts, page, postsPerPage, allPosts, searchValue } = this.state
-    const noMorePosts = page + postsPerPage >= allPosts.length
+  return (
+    <section className='container'>
+      <div className='search-container'>
+        {!!searchValue && <h1>Searching title: '{searchValue}'</h1>}
+        <TextInput
+          searchValue={searchValue}
+          handleChange={handleSearchChange}
+        />
+      </div>
 
-    const filteredPosts = !!searchValue
-      ? allPosts.filter((p) =>
-          p.title.toLowerCase().includes(searchValue.toLowerCase())
-        )
-      : posts
-
-    return (
-      <section className='container'>
-        <div className='search-container'>
-          {!!searchValue && <h1>Searching title: '{searchValue}'</h1>}
-          <TextInput
-            searchValue={searchValue}
-            handleChange={this.handleSearchChange}
+      {filteredPosts.length > 0 && <Posts posts={filteredPosts} />}
+      {filteredPosts.length === 0 && <p>None posts found!</p>}
+      <div className='button-container'>
+        {!searchValue && (
+          <Button
+            text='Load more posts'
+            onClick={loadMorePosts}
+            disabled={noMorePosts}
           />
-        </div>
-
-        {filteredPosts.length > 0 && <Posts posts={filteredPosts} />}
-        {filteredPosts.length === 0 && <p>None posts found!</p>}
-        <div className='button-container'>
-          {!searchValue && (
-            <Button
-              text='Load more posts'
-              onClick={this.loadMorePosts}
-              disabled={noMorePosts}
-            />
-          )}
-        </div>
-      </section>
-    )
-  }
+        )}
+      </div>
+    </section>
+  )
 }
