@@ -12,7 +12,7 @@ export const Home = () => {
   const [page, setPage] = useState(0)
   const [searchValue, setSearchValue] = useState('')
 
-  const POSTS_PER_PAGE = 12
+  const POSTS_PER_PAGE = 2
 
   const noMorePosts = page + POSTS_PER_PAGE >= allPosts.length
 
