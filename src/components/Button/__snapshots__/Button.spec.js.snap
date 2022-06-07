@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Button /> should be disabled when disabled prop is true 1`] = `
+<button
+  class="button"
+>
+  Load more
+</button>
+`;
