@@ -17,9 +17,7 @@ export const Home = () => {
   const noMorePosts = page + POSTS_PER_PAGE >= allPosts.length
 
   const filteredPosts = !!searchValue
-    ? allPosts.filter((p) =>
-        p.title.toLowerCase().includes(searchValue.toLowerCase())
-      )
+    ? allPosts.filter((p) => p.title.toLowerCase().includes(searchValue.toLowerCase()))
     : posts
 
   const handleLoadPosts = useCallback(async (page, postsPerPage) => {
@@ -53,22 +51,13 @@ export const Home = () => {
     <section className='container'>
       <div className='search-container'>
         {!!searchValue && <h1>Searching title: '{searchValue}'</h1>}
-        <TextInput
-          searchValue={searchValue}
-          handleChange={handleSearchChange}
-        />
+        <TextInput searchValue={searchValue} handleChange={handleSearchChange} />
       </div>
 
       {filteredPosts.length > 0 && <Posts posts={filteredPosts} />}
       {filteredPosts.length === 0 && <p>None posts found!</p>}
       <div className='button-container'>
-        {!searchValue && (
-          <Button
-            text='Load more posts'
-            onClick={loadMorePosts}
-            disabled={noMorePosts}
-          />
-        )}
+        {!searchValue && <Button text='Load more posts' onClick={loadMorePosts} disabled={noMorePosts} />}
       </div>
     </section>
   )
